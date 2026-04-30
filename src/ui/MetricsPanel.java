@@ -12,15 +12,17 @@ public class MetricsPanel extends JPanel {
     public MetricsPanel(Theme theme) {
         this.theme = theme;
         setOpaque(false);
-        setLayout(new GridLayout(6, 1, 0, 6));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         lblStatus = metric("Status: Idle");
         lblNodes = metric("Nodes Explored (Search Space): —");
         lblCost = metric("Movement Cost: —");
         lblTime = metric("Computation Time: —");
         lblPathLen = metric("Path Length: —");
         lblEfficiency = metric("Efficiency: —");
-        add(lblStatus); add(lblNodes); add(lblCost);
-        add(lblTime); add(lblPathLen); add(lblEfficiency);
+        for (JLabel l : new JLabel[]{lblStatus, lblNodes, lblCost, lblTime, lblPathLen, lblEfficiency}) {
+            add(l);
+            add(Box.createVerticalStrut(6));
+        }
     }
 
     public JLabel metric(String text) {

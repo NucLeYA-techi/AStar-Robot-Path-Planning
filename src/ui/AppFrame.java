@@ -149,7 +149,7 @@ public class AppFrame extends JFrame {
         side.setOpaque(false);
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.setBorder(new EmptyBorder(14, 14, 14, 14));
-        side.setPreferredSize(new Dimension(200, 0));
+        side.setMinimumSize(new Dimension(260, 0));
 
         side.add(sectionLabel("Edit Mode"));
         side.add(Box.createVerticalStrut(6));
