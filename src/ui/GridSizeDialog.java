@@ -1,8 +1,8 @@
 package ui;
 
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import java.awt.*;
 
 public class GridSizeDialog extends JDialog {
     public int rows = 18, cols = 22;
@@ -16,6 +16,7 @@ public class GridSizeDialog extends JDialog {
 
         JLabel titleLabel = new JLabel("Choose Grid Size", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(20,20,20));
         titleLabel.setBorder(new EmptyBorder(0, 0, 15, 0));
         add(titleLabel, BorderLayout.NORTH);
 
@@ -59,7 +60,7 @@ public class GridSizeDialog extends JDialog {
 
         JLabel descLbl = new JLabel(desc);
         descLbl.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        descLbl.setForeground(Color.GRAY);
+        descLbl.setForeground(new Color(60, 60, 60));
         descLbl.setAlignmentX(LEFT_ALIGNMENT);
 
         textPanel.add(titleLbl);
@@ -67,6 +68,20 @@ public class GridSizeDialog extends JDialog {
         textPanel.add(descLbl);
 
         btn.add(textPanel, BorderLayout.CENTER);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(new Color(25,25,25));
+        btn.setBorder(new CompoundBorder(
+        new LineBorder(new Color(180,180,180), 1),
+        new EmptyBorder(8,12,8,12)));
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(new Color(235,240,255));
+        }
+
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+            btn.setBackground(Color.WHITE);
+        }
+    });
         return btn;
     }
 
