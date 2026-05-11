@@ -1,3 +1,7 @@
+K S Tanish 
+1MS24CS074
+
+
 # 🤖 Autonomous Robot Path Planning using A*
 
 This project simulates autonomous robot navigation in a grid environment using the A* (A-star) pathfinding algorithm.
