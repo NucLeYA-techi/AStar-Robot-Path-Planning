@@ -47,10 +47,12 @@ public class GridPanel extends JPanel {
         this.theme = theme;
 
         int maxDim = Math.max(grid.rows, grid.cols);
-        if (maxDim <= 20) CELL = 28;
-        else if (maxDim <= 30) CELL = 20;
-        else if (maxDim <= 40) CELL = 16;
-        else CELL = 12;
+        if (maxDim <= 15)       CELL = 55;
+        else if (maxDim <= 20)  CELL = 45;
+        else if (maxDim <= 30)  CELL = 35;
+        else if (maxDim <= 40)  CELL = 28;
+        else if (maxDim <= 60)  CELL = 20;
+        else                    CELL = 16;
 
         setOpaque(false);
         setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
@@ -224,6 +226,9 @@ public class GridPanel extends JPanel {
                     g2.setStroke(new BasicStroke(1f));
                 }
 
+                // A* value labels (f centered, g top-left, h top-right)
+                drawNodeValues(g2, x, y, n);
+
                 // Icons — robot emoji takes priority over start/goal during animation
                 if (n.equals(robotCurrentPosition) && !n.equals(startNode)) {
                     drawRobotEmoji(g2, x, y);
@@ -258,7 +263,7 @@ public class GridPanel extends JPanel {
 
     /** Draws "S" or "G" with a dark outline for visibility on any background. */
     private void drawNodeLabel(Graphics2D g2, int x, int y, String label, Color fg) {
-        int fontSize = Math.max(10, CELL - 8);
+        int fontSize = Math.max(12, CELL / 2);
         g2.setFont(new Font("SansSerif", Font.BOLD, fontSize));
         FontMetrics fm = g2.getFontMetrics();
         int tx = x + (CELL - fm.stringWidth(label)) / 2;
@@ -270,6 +275,57 @@ public class GridPanel extends JPanel {
                 if (dx != 0 || dy != 0) g2.drawString(label, tx + dx, ty + dy);
         g2.setColor(fg);
         g2.drawString(label, tx, ty);
+    }
+
+    /** Draws f(x) centered, g(x) top-left, h(x) top-right for visited nodes. */
+    private void drawNodeValues(Graphics2D g2, int x, int y, Node n) {
+        if (n.wall) return;
+        boolean visited = openSet.contains(n) || closedSet.contains(n)
+                || n.equals(startNode) || n.equals(goalNode);
+        if (!visited) return;
+        if (n.g == 0 && n.h == 0 && !n.equals(startNode)) return;
+
+        boolean isStartOrGoal = n.equals(startNode) || n.equals(goalNode);
+
+        String gStr = String.valueOf((int) n.g);
+        String hStr = String.valueOf((int) n.h);
+        String fStr = String.valueOf((int) n.f);
+
+        // Small font for corner values — sized to never overlap
+        int smFont = Math.max(8, Math.min(10, CELL / 4));
+        g2.setFont(new Font("Monospaced", Font.PLAIN, smFont));
+        FontMetrics sm = g2.getFontMetrics();
+        int smH = sm.getAscent();
+
+        // Top-left: g(x) — cyan
+        drawTextWithOutline(g2, gStr, x + 3, y + smH + 1,
+                new Color(100, 215, 255), 180);
+
+        // Top-right: h(x) — amber
+        int hX = x + CELL - sm.stringWidth(hStr) - 3;
+        drawTextWithOutline(g2, hStr, hX, y + smH + 1,
+                new Color(255, 210, 100), 180);
+
+        // Center: f(x) — skip on start/goal (S/G label is the identifier)
+        if (!isStartOrGoal) {
+            int lgFont = Math.max(9, Math.min(13, CELL / 3));
+            g2.setFont(new Font("Monospaced", Font.BOLD, lgFont));
+            FontMetrics lg = g2.getFontMetrics();
+            int fX = x + (CELL - lg.stringWidth(fStr)) / 2;
+            int fY = y + (CELL + lg.getAscent() - lg.getDescent()) / 2;
+            drawTextWithOutline(g2, fStr, fX, fY, Color.WHITE, 200);
+        }
+    }
+
+    /** Draws text with a dark outline for visibility on any background. */
+    private void drawTextWithOutline(Graphics2D g2, String text, int x, int y,
+                                     Color color, int alpha) {
+        g2.setColor(new Color(0, 0, 0, alpha));
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+                if (dx != 0 || dy != 0) g2.drawString(text, x + dx, y + dy);
+        g2.setColor(color);
+        g2.drawString(text, x, y);
     }
 
     /** Draws the robot emoji centered in the cell with a contrasting glow ring. */

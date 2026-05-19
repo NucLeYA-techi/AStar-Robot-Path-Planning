@@ -12,7 +12,11 @@ public class Node implements Comparable<Node> {
 
     public void reset() { g = h = f = 0; parent = null; }
 
-    @Override public int compareTo(Node o) { return Double.compare(f, o.f); }
+    @Override public int compareTo(Node o) {
+        int cmp = Double.compare(f, o.f);
+        if (cmp != 0) return cmp;
+        return Double.compare(h, o.h); // tie-break: prefer lower h (closer to goal)
+    }
 
     @Override public boolean equals(Object o) {
         if (!(o instanceof Node)) return false;

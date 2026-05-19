@@ -23,7 +23,7 @@ public class AppFrame extends JFrame {
     public LegendPanel legendPanel;
 
     public FlatButton btnSolve, btnTheme, btnRandom, btnChangeGrid;
-    public FlatButton btnPause, btnResume, btnStep;
+    public FlatButton btnPause, btnResume, btnStep, btnPrevious;
     public FlatButton btnModeWall, btnModeErase, btnModeStart, btnModeGoal;
     // Improved reset controls
     public FlatButton btnClearPath, btnClearObstacles, btnFullReset;
@@ -205,7 +205,8 @@ public class AppFrame extends JFrame {
         btnPause   = new FlatButton("⏸ Pause", theme);
         btnResume  = new FlatButton("▶ Resume", theme);
         btnStep    = new FlatButton("⏭ Step", theme);
-        for (FlatButton b : new FlatButton[]{btnSolve, btnPause, btnResume, btnStep}) {
+        btnPrevious = new FlatButton("⏮ Previous", theme);
+        for (FlatButton b : new FlatButton[]{btnSolve, btnPause, btnResume, btnStep, btnPrevious}) {
             b.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
             b.setAlignmentX(LEFT_ALIGNMENT);
             side.add(b);
@@ -262,6 +263,7 @@ public class AppFrame extends JFrame {
         btnPause.addActionListener(e -> { paused.set(true); setStatus("Navigation paused."); });
         btnResume.addActionListener(e -> { paused.set(false); setStatus("Searching for optimal route..."); });
         btnStep.addActionListener(e -> doStep());
+        btnPrevious.addActionListener(e -> doStepBack());
         btnClearPath.addActionListener(e -> clearPath());
         btnClearObstacles.addActionListener(e -> clearObstacles());
         btnFullReset.addActionListener(e -> fullReset());
@@ -445,7 +447,9 @@ public class AppFrame extends JFrame {
                 gridPanel.repaint();
             }
             @Override protected void done() {
-                gridPanel.robotCurrentPosition = path.get(path.size() - 1);
+                if (path != null && !path.isEmpty()) {
+                    gridPanel.robotCurrentPosition = path.get(path.size() - 1);
+                }
                 gridPanel.repaint();
                 setStatus("Robot reached the target! ✓");
             }
@@ -464,6 +468,23 @@ public class AppFrame extends JFrame {
         closedSnap.forEach(n -> gridPanel.closedFade.putIfAbsent(n, 1f));
         metricsPanel.update("Stepped", activeSolver.steps, -1, -1);
         setStatus("Step executed. Nodes explored: " + activeSolver.steps);
+        gridPanel.repaint();
+    }
+
+    public void doStepBack() {
+        if (activeSolver == null || !activeSolver.canStepBack()) return;
+        paused.set(true);
+        activeSolver.stepBack();
+        Set<Node> openSnap   = new HashSet<>(activeSolver.openSetLookup);
+        Set<Node> closedSnap = new HashSet<>(activeSolver.closedSet);
+        gridPanel.openSet   = openSnap;
+        gridPanel.closedSet = closedSnap;
+        gridPanel.openFade.clear();
+        gridPanel.closedFade.clear();
+        openSnap.forEach(n   -> gridPanel.openFade.put(n, 1f));
+        closedSnap.forEach(n -> gridPanel.closedFade.put(n, 1f));
+        metricsPanel.update("Stepped back", activeSolver.steps, -1, -1);
+        setStatus("Stepped back. Nodes explored: " + activeSolver.steps);
         gridPanel.repaint();
     }
 
@@ -667,7 +688,7 @@ public class AppFrame extends JFrame {
     private void styleCombo(JComboBox<?> combo) {
         boolean isLight = theme.name.equals("Light");
         Color bg  = isLight ? new Color(220, 224, 242) : theme.btnBg;
-        Color fg  = Color.WHITE;
+        Color fg  = isLight ? new Color(25, 25, 40) : Color.WHITE;
 
         combo.setBackground(bg);
         combo.setForeground(fg);
@@ -688,7 +709,7 @@ public class AppFrame extends JFrame {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 boolean light = theme.name.equals("Light");
                 Color itemBg = light ? new Color(220, 224, 242) : theme.btnBg;
-                Color itemFg = Color.WHITE;
+                Color itemFg = light ? new Color(25, 25, 40) : Color.WHITE;
                 if (isSelected && index >= 0) {          // highlighted in open list
                     setBackground(theme.accent);
                     setForeground(Color.WHITE);
@@ -721,7 +742,7 @@ public class AppFrame extends JFrame {
         for (FlatButton b : new FlatButton[]{
                 btnTheme, btnSolve, btnClearPath, btnClearObstacles, btnFullReset,
                 btnRandom, btnSave, btnChangeGrid,
-                btnPause, btnResume, btnStep,
+                btnPause, btnResume, btnStep, btnPrevious,
                 btnModeWall, btnModeErase, btnModeStart, btnModeGoal}) {
             b.applyTheme(theme);
         }

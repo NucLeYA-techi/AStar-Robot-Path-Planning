@@ -20,22 +20,24 @@ public class GridSizeDialog extends JDialog {
         titleLabel.setBorder(new EmptyBorder(0, 0, 15, 0));
         add(titleLabel, BorderLayout.NORTH);
 
-        JPanel center = new JPanel(new GridLayout(5, 1, 12, 12));
+        JPanel center = new JPanel(new GridLayout(6, 1, 12, 12));
         center.setBorder(new EmptyBorder(5, 10, 5, 10));
 
         JButton btn1 = createStyledButton("Small", "10 × 15", "Ideal for quick tests");
         JButton btn2 = createStyledButton("Medium", "18 × 22", "Balanced size (Default)");
-        JButton btn3 = createStyledButton("Large", "25 × 30", "More complex paths");
-        JButton btn4 = createStyledButton("Extra Large", "30 × 40", "Maximum complexity");
-        JButton btnCustom = createStyledButton("Custom Size", "Your choice", "Up to 30 × 40");
+        JButton btn3 = createStyledButton("Large", "30 × 40", "More complex paths");
+        JButton btn4 = createStyledButton("Extra Large", "40 × 60", "High complexity");
+        JButton btn5 = createStyledButton("Extreme", "50 × 70", "Maximum complexity — requires scrolling");
+        JButton btnCustom = createStyledButton("Custom Size", "Your choice", "Up to 60 × 80");
 
         btn1.addActionListener(e -> { rows = 10; cols = 15; confirmed = true; dispose(); });
         btn2.addActionListener(e -> { rows = 18; cols = 22; confirmed = true; dispose(); });
-        btn3.addActionListener(e -> { rows = 25; cols = 30; confirmed = true; dispose(); });
-        btn4.addActionListener(e -> { rows = 30; cols = 40; confirmed = true; dispose(); });
+        btn3.addActionListener(e -> { rows = 30; cols = 40; confirmed = true; dispose(); });
+        btn4.addActionListener(e -> { rows = 40; cols = 60; confirmed = true; dispose(); });
+        btn5.addActionListener(e -> { rows = 50; cols = 70; confirmed = true; dispose(); });
         btnCustom.addActionListener(e -> showCustomDialog());
 
-        center.add(btn1); center.add(btn2); center.add(btn3); center.add(btn4); center.add(btnCustom);
+        center.add(btn1); center.add(btn2); center.add(btn3); center.add(btn4); center.add(btn5); center.add(btnCustom);
         add(center, BorderLayout.CENTER);
 
         pack();
@@ -108,10 +110,10 @@ public class GridSizeDialog extends JDialog {
             try {
                 int r = Integer.parseInt(rowField.getText().trim());
                 int c = Integer.parseInt(colField.getText().trim());
-                if (r > 0 && r <= 30 && c > 0 && c <= 40) {
+                if (r > 0 && r <= 60 && c > 0 && c <= 80) {
                     rows = r; cols = c; confirmed = true; dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Please enter rows (1-30) and columns (1-40). Try again.",
+                    JOptionPane.showMessageDialog(this, "Please enter rows (1-60) and columns (1-80). Try again.",
                             "Invalid Input", JOptionPane.WARNING_MESSAGE);
                     showCustomDialog();
                 }

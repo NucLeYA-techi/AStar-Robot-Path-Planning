@@ -16,6 +16,8 @@ public class AStarSolver {
     public boolean done = false, found = false;
     public int steps = 0;
 
+    private final Deque<SolverState> history = new ArrayDeque<>();
+
     public AStarSolver(Grid grid, Node start, Node goal) {
         this.grid = grid; this.start = start; this.goal = goal;
         grid.reset();
@@ -24,10 +26,12 @@ public class AStarSolver {
         start.f = start.h;
         openSet.add(start);
         openSetLookup.add(start);
+        saveState();
     }
 
     public boolean step() {
         if (done || openSet.isEmpty()) { done = true; return false; }
+        saveState();
         Node current = openSet.poll();
         openSetLookup.remove(current);
         if (current.equals(goal)) { done = true; found = true; return false; }
@@ -49,6 +53,56 @@ public class AStarSolver {
         }
         return true;
     }
+
+    public boolean stepBack() {
+        if (history.isEmpty()) return false;
+        SolverState prev = history.removeLast();
+        restoreState(prev);
+        steps = Math.max(0, steps - 1);
+        done = false;
+        found = false;
+        return true;
+    }
+
+    public boolean canStepBack() {
+        return !history.isEmpty();
+    }
+
+    private void saveState() {
+        List<Node> openList = new ArrayList<>(openSetLookup);
+        List<Node> closedList = new ArrayList<>(closedSet);
+        Map<Node, NodeSnapshot> nodeStates = new HashMap<>();
+        for (Node n : openSetLookup) {
+            nodeStates.put(n, new NodeSnapshot(n.g, n.h, n.f, n.parent));
+        }
+        for (Node n : closedSet) {
+            nodeStates.put(n, new NodeSnapshot(n.g, n.h, n.f, n.parent));
+        }
+        history.add(new SolverState(openList, closedList, nodeStates));
+    }
+
+    private void restoreState(SolverState state) {
+        openSet.clear();
+        openSetLookup.clear();
+        closedSet.clear();
+        for (Node n : state.openList) {
+            openSet.add(n);
+            openSetLookup.add(n);
+        }
+        closedSet.addAll(state.closedList);
+        for (Map.Entry<Node, NodeSnapshot> entry : state.nodeStates.entrySet()) {
+            Node n = entry.getKey();
+            NodeSnapshot snap = entry.getValue();
+            n.g = snap.g;
+            n.h = snap.h;
+            n.f = snap.f;
+            n.parent = snap.parent;
+        }
+    }
+
+    private record NodeSnapshot(double g, double h, double f, Node parent) {}
+    private record SolverState(List<Node> openList, List<Node> closedList,
+                               Map<Node, NodeSnapshot> nodeStates) {}
 
     public List<Node> reconstructPath() {
         List<Node> path = new ArrayList<>();
